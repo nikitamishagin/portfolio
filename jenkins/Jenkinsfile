@@ -1,0 +1,10 @@
+pipeline {
+  agent any
+  stages {
+    stage('Build-docker-image') {
+      steps{
+        docker build -t nikitamishagin/portfolio:latest .
+      }
+    }
+  }
+}

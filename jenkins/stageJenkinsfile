@@ -1,0 +1,26 @@
+pipeline {
+  environment{
+    WEB_IMAGE = "nikitamishagin/portfolio-web"
+  }
+  agent any
+  stages {
+    stage('Build-docker-image') {
+      steps{
+        sh 'docker build -t ${WEB_IMAGE}:${BUILD_NUMBER} .'
+        sh 'docker tag ${WEB_IMAGE}:${BUILD_NUMBER} ${WEB_IMAGE}:latest'
+      }
+    }
+
+    stage('Deploy-to-staging-environment'){
+      steps{
+        sh 'docker service update --image ${WEB_IMAGE}:latest stagePortfolio_web'
+      }
+    }
+
+    stage('Testing'){
+      steps{
+        sh 'echo "There should be automated tests..."'
+      }
+    }
+  }
+}

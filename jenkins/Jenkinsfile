@@ -3,7 +3,9 @@ pipeline {
   stages {
     stage('Build-docker-image') {
       steps{
-        docker build -t nikitamishagin/portfolio:latest .
+        sh 'echo ${GIT_COMMIT}'
+        sh 'docker build -t portfolio-web:${GIT_COMMIT} .'
+        sh 'docker tag portfolio-web:${GIT_COMMIT} portfolio-web:latest'
       }
     }
   }

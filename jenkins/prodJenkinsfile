@@ -1,0 +1,22 @@
+pipeline {
+  environment{
+    WEB_IMAGE = "nikitamishagin/portfolio-web"
+    DOCKERHUB_CRED=credentials('hub.docker')
+  }
+  agent any
+  stages {
+    stage('Push-docker-image') {
+      steps{
+        sh 'echo $DOCKERHUB_CRED_PSW | docker login -u $DOCKERHUB_CRED_USR --password-stdin'
+        sh 'docker push ${WEB_IMAGE}:latest'
+        sh 'docker logout'
+      }
+    }
+
+    stage('Deploy-to-production-environment'){
+      steps{
+        sh 'docker service update --image ${WEB_IMAGE}:latest portfolio_web'
+      }
+    }
+  }
+}

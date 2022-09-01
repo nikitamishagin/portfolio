@@ -14,11 +14,10 @@ provider "yandex" {
   zone = var.availability_zone
 }
 
-resource "yandex_kubernetes_cluster" "zonal_cluster_resource_name" {
+resource "yandex_kubernetes_cluster" "master-node" {
   name        = var.cluster_name
   description = "The kubernetes cluster"
-
-  network_id = var.cloud_network_id
+  network_id  = var.cloud_network_id
 
   master {
     version = var.kuber_version
@@ -31,18 +30,78 @@ resource "yandex_kubernetes_cluster" "zonal_cluster_resource_name" {
 
     maintenance_policy {
       auto_upgrade = true
-      # maintenance_window = var.maintenance_window
+
+      maintenance_window {
+        start_time = var.start_time
+        duration = var.duration
+      }
     }
   }
 
   service_account_id      = var.service_account_id
   node_service_account_id = var.node_service_account_id
-
-  labels = var.labels
-
   release_channel = var.release
+}
 
-  # kms_provider {
-  #   key_id = "${yandex_kms_symmetric_key.kms_key_resource_name.id}"
-  # }
+resource "yandex_kubernetes_node_group" "worker-nodes" {
+  cluster_id  = yandex_kubernetes_cluster.master-node.id
+  name        = "worker-group"
+  description = "The kubernetes worker group"
+  version     = var.kuber_version
+
+  instance_template {
+    platform_id = var.platform_id
+    name = "worker-node-{instance.short_id}"
+
+    network_interface {
+      nat                = true
+      subnet_ids         = [var.subnet_id]
+    }
+
+    resources {
+      memory = var.worker_memory
+      cores  = var.worker_cpu
+      core_fraction = var.core_fraction
+    }
+
+    boot_disk {
+      type = var.worker_disk_type
+      size = var.worker_disk_size
+    }
+
+    scheduling_policy {
+      preemptible = var.worker_preemptible
+    }
+
+    container_runtime {
+      type = var.container_runtime
+    }
+  }
+
+  scale_policy {
+    fixed_scale {
+      size = var.fixed_scale_number_nodes
+    }
+  }
+
+  deploy_policy {
+    max_expansion = var.worker_max_expansion
+    max_unavailable = var.worker_max_unvailable
+  }
+
+  allocation_policy {
+    location {
+      zone = var.availability_zone
+    }
+  }
+
+  maintenance_policy {
+    auto_upgrade = true
+    auto_repair  = true
+
+    maintenance_window {
+      start_time = var.start_time
+      duration = var.duration
+    }
+  }
 }

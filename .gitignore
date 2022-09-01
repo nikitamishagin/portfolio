@@ -1,2 +1,3 @@
 */account_yandex.env
 */.terraform*
+*/terraform.tfstate

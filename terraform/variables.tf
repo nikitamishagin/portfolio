@@ -3,6 +3,7 @@ variable "yandex_id" {}
 variable "yandex_folder" {}
 variable "availability_zone" {}
 
+### --- Master variables
 variable "cluster_name" {
   description = "The name cluster of kubernetes"
 }
@@ -26,22 +27,24 @@ variable "public_ip" {
   default = false
 }
 
-variable "maintenance_window" {
-  type = map
-  default = {
-    start_time = "03:00"
-    duration   = "1h"
-  }
+variable "start_time" {
+  description = "Start upgrade time"
+  default = "03:00"
+}
+
+variable "duration" {
+  description = "Duration upgrade"
+  default = "1h"
 }
 
 variable "service_account_id" {
   description = "Service account ID"
-  default = ""
+  default = "ajeaf1bgpnvamfkcuuft"
 }
 
 variable "node_service_account_id" {
   description = "Node service account ID"
-  default = ""
+  default = "ajeaf1bgpnvamfkcuuft"
 }
 
 variable "labels" {
@@ -54,4 +57,49 @@ variable "labels" {
 
 variable "release" {
   default = "STABLE"
+}
+
+### --- Worker variables
+variable "platform_id" {
+  default = "standard-v3"
+}
+
+variable "worker_memory" {
+  default = "1"
+}
+
+variable "worker_cpu" {
+  default = "2"
+}
+
+variable "core_fraction" {
+  
+}
+
+variable "worker_disk_type" {
+  default = "network-hdd"
+}
+
+variable "worker_disk_size" {
+  default = "64"
+}
+
+variable "worker_preemptible" {
+  default = "false"
+}
+
+variable "container_runtime" {
+  default = "docker"
+}
+
+variable "fixed_scale_number_nodes" {
+  default = "1"
+}
+
+variable "worker_max_expansion" {
+
+}
+
+variable "worker_max_unvailable" {
+
 }

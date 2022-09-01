@@ -1,0 +1,4 @@
+./jankins
+./terraform
+./.git*
+./vhost.env

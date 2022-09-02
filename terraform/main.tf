@@ -1,19 +1,19 @@
 terraform {
   required_providers {
     yandex = {
-      source = "yandex-cloud/yandex"
+      source  = "yandex-cloud/yandex"
       version = "0.77.0"
     }
   }
 }
 
 provider "yandex" {
-  token = var.yandex_token
-  cloud_id = var.yandex_id
+  token     = var.yandex_token
+  cloud_id  = var.yandex_id
   folder_id = var.yandex_folder
-  zone = var.availability_zone
 }
 
+### --- Master node of kubernetes --- ###
 resource "yandex_kubernetes_cluster" "master-node" {
   name        = var.cluster_name
   description = "The kubernetes cluster"
@@ -33,34 +33,35 @@ resource "yandex_kubernetes_cluster" "master-node" {
 
       maintenance_window {
         start_time = var.start_time
-        duration = var.duration
+        duration   = var.duration
       }
     }
   }
 
   service_account_id      = var.service_account_id
   node_service_account_id = var.node_service_account_id
-  release_channel = var.release
+  release_channel         = var.release
 }
 
+### --- Worker nodes of kubernetes --- ###
 resource "yandex_kubernetes_node_group" "worker-nodes" {
   cluster_id  = yandex_kubernetes_cluster.master-node.id
-  name        = "worker-group"
+  name        = var.worker_group_name
   description = "The kubernetes worker group"
   version     = var.kuber_version
 
   instance_template {
     platform_id = var.platform_id
-    name = "worker-node-{instance.short_id}"
+    name        = "worker-node-{instance.short_id}"
 
     network_interface {
-      nat                = true
-      subnet_ids         = [var.subnet_id]
+      nat        = true
+      subnet_ids = [var.subnet_id]
     }
 
     resources {
-      memory = var.worker_memory
-      cores  = var.worker_cpu
+      memory        = var.worker_memory
+      cores         = var.worker_cpu
       core_fraction = var.core_fraction
     }
 
@@ -85,7 +86,7 @@ resource "yandex_kubernetes_node_group" "worker-nodes" {
   }
 
   deploy_policy {
-    max_expansion = var.worker_max_expansion
+    max_expansion   = var.worker_max_expansion
     max_unavailable = var.worker_max_unvailable
   }
 
@@ -101,7 +102,7 @@ resource "yandex_kubernetes_node_group" "worker-nodes" {
 
     maintenance_window {
       start_time = var.start_time
-      duration = var.duration
+      duration   = var.duration
     }
   }
 }
